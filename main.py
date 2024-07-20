@@ -273,7 +273,9 @@ def view_crime():
     evidence = fetch_query(query, (crime_id,))
 
     if crime:
-        messagebox.showinfo("Crime Details", f"Crime: {crime['crime']}\nDate: {crime['date']}\nNotes: {crime['notes']}")
+        details = f"Crime: {crime['crime']}\nDate: {crime['date']}\nNotes: {crime['notes']}"
+        messagebox.showinfo("Crime Details", details)
+
         for i, img_data in enumerate(evidence):
             image = Image.open(io.BytesIO(img_data['image_data']))
             image.thumbnail((200, 200))
@@ -286,6 +288,7 @@ def view_crime():
             label.pack()
     else:
         messagebox.showerror("Error", "Crime not found")
+
 
 # Create main window
 root = tk.Tk()
@@ -302,61 +305,53 @@ notebook.add(criminals_tab, text="Criminals")
 notebook.add(crimes_tab, text="Crimes")
 
 # Criminals tab
-tk.Label(criminals_tab, text="Name:").grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
-name_entry = ttk.Entry(criminals_tab)
-name_entry.grid(row=0, column=1, padx=5, pady=5, sticky=tk.EW)
+tk.Label(criminals_tab, text="Name:").grid(row=0, column=0, sticky='w', padx=5, pady=5)
+name_entry = tk.Entry(criminals_tab)
+name_entry.grid(row=0, column=1, sticky='ew', padx=5, pady=5)
 
-tk.Label(criminals_tab, text="Date of Birth:").grid(row=1, column=0, padx=5, pady=5, sticky=tk.W)
-dob_entry = DateEntry(criminals_tab)
-dob_entry.grid(row=1, column=1, padx=5, pady=5, sticky=tk.EW)
+tk.Label(criminals_tab, text="Date of Birth:").grid(row=1, column=0, sticky='w', padx=5, pady=5)
+dob_entry = DateEntry(criminals_tab, date_pattern='yyyy-mm-dd')
+dob_entry.grid(row=1, column=1, sticky='ew', padx=5, pady=5)
 
-tk.Label(criminals_tab, text="Race:").grid(row=2, column=0, padx=5, pady=5, sticky=tk.W)
-race_entry = ttk.Entry(criminals_tab)
-race_entry.grid(row=2, column=1, padx=5, pady=5, sticky=tk.EW)
+tk.Label(criminals_tab, text="Race:").grid(row=2, column=0, sticky='w', padx=5, pady=5)
+race_entry = tk.Entry(criminals_tab)
+race_entry.grid(row=2, column=1, sticky='ew', padx=5, pady=5)
 
 married_var = tk.BooleanVar()
-ttk.Checkbutton(criminals_tab, text="Married", variable=married_var).grid(row=3, column=0, columnspan=2, padx=5, pady=5)
+tk.Checkbutton(criminals_tab, text="Married", variable=married_var).grid(row=3, column=0, columnspan=2, padx=5, pady=5)
 
-ttk.Button(criminals_tab, text="Add Criminal", command=add_criminal).grid(row=4, column=0, padx=5, pady=5)
-ttk.Button(criminals_tab, text="Update Criminal", command=update_criminal).grid(row=4, column=1, padx=5, pady=5)
-ttk.Button(criminals_tab, text="Delete Criminal", command=delete_criminal).grid(row=4, column=2, padx=5, pady=5)
+tk.Button(criminals_tab, text="Add Criminal", command=add_criminal).grid(row=4, column=0, padx=5, pady=5)
+tk.Button(criminals_tab, text="Update Criminal", command=update_criminal).grid(row=4, column=1, padx=5, pady=5)
+tk.Button(criminals_tab, text="Delete Criminal", command=delete_criminal).grid(row=4, column=2, padx=5, pady=5)
 
-criminal_listbox = tk.Listbox(criminals_tab, width=50)
-criminal_listbox.grid(row=5, column=0, columnspan=3, padx=5, pady=5, sticky=tk.EW)
+criminal_listbox = tk.Listbox(criminals_tab, width=50, height=10)
+criminal_listbox.grid(row=5, column=0, columnspan=3, padx=5, pady=5, sticky='ew')
 
 # Crimes tab
-tk.Label(crimes_tab, text="Crime:").grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
-crime_entry = ttk.Entry(crimes_tab)
-crime_entry.grid(row=0, column=1, padx=5, pady=5, sticky=tk.EW)
+tk.Label(crimes_tab, text="Crime:").grid(row=0, column=0, sticky='w', padx=5, pady=5)
+crime_entry = tk.Entry(crimes_tab)
+crime_entry.grid(row=0, column=1, sticky='ew', padx=5, pady=5)
 
-tk.Label(crimes_tab, text="Date:").grid(row=1, column=0, padx=5, pady=5, sticky=tk.W)
-date_entry = DateEntry(crimes_tab)
-date_entry.grid(row=1, column=1, padx=5, pady=5, sticky=tk.EW)
+tk.Label(crimes_tab, text="Date:").grid(row=1, column=0, sticky='w', padx=5, pady=5)
+date_entry = DateEntry(crimes_tab, date_pattern='yyyy-mm-dd')
+date_entry.grid(row=1, column=1, sticky='ew', padx=5, pady=5)
 
-tk.Label(crimes_tab, text="Notes:").grid(row=2, column=0, padx=5, pady=5, sticky=tk.W)
+tk.Label(crimes_tab, text="Notes:").grid(row=2, column=0, sticky='w', padx=5, pady=5)
 notes_entry = tk.Text(crimes_tab, height=3, width=20)
-notes_entry.grid(row=2, column=1, padx=5, pady=5, sticky=tk.EW)
+notes_entry.grid(row=2, column=1, padx=5, pady=5, sticky='ew')
 
-ttk.Button(crimes_tab, text="Select Evidence", command=select_evidence).grid(row=3, column=0, padx=5, pady=5)
-evidence_label = ttk.Label(crimes_tab, text="No images selected")
-evidence_label.grid(row=3, column=1, padx=5, pady=5, sticky=tk.W)
+tk.Button(crimes_tab, text="Select Evidence", command=select_evidence).grid(row=3, column=0, padx=5, pady=5)
+evidence_label = tk.Label(crimes_tab, text="No images selected")
+evidence_label.grid(row=3, column=1, padx=5, pady=5, sticky='w')
 
-ttk.Button(crimes_tab, text="Add Crime", command=add_crime).grid(row=4, column=0, padx=5, pady=5)
-ttk.Button(crimes_tab, text="Update Crime", command=update_crime).grid(row=4, column=1, padx=5, pady=5)
-ttk.Button(crimes_tab, text="Delete Crime", command=delete_crime).grid(row=4, column=2, padx=5, pady=5)
+tk.Button(crimes_tab, text="Add Crime", command=add_crime).grid(row=4, column=0, padx=5, pady=5)
+tk.Button(crimes_tab, text="Update Crime", command=update_crime).grid(row=4, column=1, padx=5, pady=5)
+tk.Button(crimes_tab, text="Delete Crime", command=delete_crime).grid(row=4, column=2, padx=5, pady=5)
 
-crime_listbox = tk.Listbox(crimes_tab, width=50)
-crime_listbox.grid(row=5, column=0, columnspan=3, padx=5, pady=5, sticky=tk.EW)
+crime_listbox = tk.Listbox(crimes_tab, width=50, height=10)
+crime_listbox.grid(row=5, column=0, columnspan=3, padx=5, pady=5, sticky='ew')
 
-ttk.Button(crimes_tab, text="View Crime", command=view_crime).grid(row=6, column=0, columnspan=3, padx=5, pady=5)
-
-# Configure grid weights for responsiveness
-for i in range(3):
-    criminals_tab.columnconfigure(i, weight=1)
-    crimes_tab.columnconfigure(i, weight=1)
-
-criminals_tab.rowconfigure(5, weight=1)
-crimes_tab.rowconfigure(5, weight=1)
+tk.Button(crimes_tab, text="View Crime", command=view_crime).grid(row=6, column=0, columnspan=3, padx=5, pady=5)
 
 # Initialize
 create_tables()
