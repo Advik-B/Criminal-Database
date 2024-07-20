@@ -39,7 +39,7 @@ def create_tables():
         crime TEXT,
         date TEXT,
         notes TEXT,
-        evidence BLOB
+        evidence TEXT
     );
     """
     command2 = """
