@@ -123,7 +123,7 @@ def update_criminal():
         messagebox.showerror("Error", "Please select a criminal to update")
         return
 
-    serial_number = criminal_listbox.item(selected[0])['values'][0]
+    serial_number = criminal_listbox.item(selection[0])['values'][0]
     name = name_entry.get()
     dob = dob_entry.get_date()
     race = race_entry.get()
@@ -149,7 +149,7 @@ def delete_criminal():
         messagebox.showerror("Error", "Please select a criminal to delete")
         return
 
-    serial_number = criminal_listbox.item(selected[0])['values'][0]
+    serial_number = criminal_listbox.item(selection[0])['values'][0]
 
     if messagebox.askyesno("Confirm", "Are you sure you want to delete this criminal and all associated crimes?"):
         query = "DELETE FROM criminals WHERE serial_number = %s;"
@@ -158,6 +158,7 @@ def delete_criminal():
         messagebox.showinfo("Success", f"Criminal deleted: {serial_number}")
         refresh_criminal_list()
         refresh_crime_list()
+
 
 def add_crime():
     selection = criminal_listbox.selection()
@@ -238,7 +239,7 @@ def delete_crime():
         messagebox.showerror("Error", "Please select a crime to delete")
         return
 
-    crime_id = crime_listbox.item(selected[0])['values'][0]
+    crime_id = crime_listbox.item(selection[0])['values'][0]
 
     if messagebox.askyesno("Confirm", "Are you sure you want to delete this crime?"):
         query = "DELETE FROM crimes WHERE id = %s;"
@@ -246,6 +247,7 @@ def delete_crime():
 
         messagebox.showinfo("Success", f"Crime deleted: {crime_id}")
         refresh_crime_list()
+
 
 def refresh_criminal_list():
     for item in criminal_listbox.get_children():
