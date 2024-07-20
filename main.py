@@ -5,6 +5,11 @@ from tkcalendar import DateEntry
 from PIL import Image, ImageTk
 import io
 import random
+import ctypes
+ctypes.windll.shcore.SetProcessDpiAwareness(1)
+ctypes.windll.user32.SetProcessDPIAware()
+# Make it so that the window icon is not python's icon
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("dev.krish.CriminalDatabase")
 
 # Replace these with your actual MySQL connection details
 config = {
