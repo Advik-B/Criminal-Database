@@ -119,3 +119,13 @@ def get_crimes(serial_number: str):
     conn.close()
     return crime
 
+
+def get_criminal(serial_number: str):
+    command = f"""
+    SELECT * FROM criminals WHERE serial_number = "{serial_number}";
+    """
+    c.execute(command)
+    criminal = c.fetchall()
+    conn.close()
+    return criminal
+
