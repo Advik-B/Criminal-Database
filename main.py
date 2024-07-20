@@ -6,6 +6,8 @@ from tkinter import filedialog
 from tkinter import ttk
 import random
 
+conn = sqlite3.connect('database.db')
+c = conn.cursor()
 
 def gen_uuid():
     keys = "abcdefghijklmnopqrstuvwxyz1234567890"
@@ -19,8 +21,6 @@ def gen_uuid():
 
 
 def create_tables():
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
     """
     Crimes
     ------
@@ -39,7 +39,7 @@ def create_tables():
         crime TEXT,
         date TEXT,
         notes TEXT,
-        evidence TEXT
+        evidence BLOB
     );
     """
     command2 = """
@@ -58,10 +58,8 @@ def create_tables():
 
 
 def add_criminal(name: str, dob: str, is_married: bool, race: str = "black"):
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
     # First make a unique serial number
-    serial_number = str(gen_uuid())[:8]
+    serial_number = gen_uuid()
     command = f"""
     INSERT INTO criminals VALUES (
         "{serial_number}",
@@ -78,8 +76,6 @@ def add_criminal(name: str, dob: str, is_married: bool, race: str = "black"):
 
 
 def add_crime(serial_number: str, crime: str, date: str, notes: str, evidence: str):
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
     command = f"""
     INSERT INTO crimes VALUES (
         "{serial_number}",
@@ -96,8 +92,6 @@ def add_crime(serial_number: str, crime: str, date: str, notes: str, evidence: s
 
 
 def get_crimes():
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
     command = """
     SELECT * FROM crimes;
     """
@@ -107,8 +101,6 @@ def get_crimes():
     return crimes
 
 def get_criminals():
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
     command = """
     SELECT * FROM criminals;
     """
@@ -119,8 +111,6 @@ def get_criminals():
 
 
 def get_crimes(serial_number: str):
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
     command = f"""
     SELECT * FROM crimes WHERE serial_number = "{serial_number}";
     """
