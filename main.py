@@ -5,6 +5,7 @@ import random
 from tkcalendar import DateEntry
 from PIL import Image, ImageTk
 import io
+from datetime import datetime
 
 # Replace these with your actual MySQL connection details
 config = {
@@ -88,7 +89,7 @@ def create_tables():
 
 def add_criminal():
     name = name_entry.get()
-    dob = dob_entry.get()
+    dob = dob_entry.get_date()
     race = race_entry.get()
     is_married = married_var.get()
 
@@ -101,7 +102,7 @@ def add_criminal():
     INSERT INTO criminals (serial_number, name, dob, race, is_married)
     VALUES (%s, %s, %s, %s, %s);
     """
-    execute_query(query, (serial_number, name, dob, race, is_married))
+    execute_query(query, (serial_number, name, dob.strftime('%Y-%m-%d'), race, is_married))
 
     messagebox.showinfo("Success", f"Criminal added with serial number: {serial_number}")
     refresh_criminal_list()
@@ -114,7 +115,7 @@ def update_criminal():
 
     serial_number = criminal_listbox.get(selection[0]).split()[0]
     name = name_entry.get()
-    dob = dob_entry.get()
+    dob = dob_entry.get_date()
     race = race_entry.get()
     is_married = married_var.get()
 
@@ -127,7 +128,7 @@ def update_criminal():
     SET name = %s, dob = %s, race = %s, is_married = %s
     WHERE serial_number = %s;
     """
-    execute_query(query, (name, dob, race, is_married, serial_number))
+    execute_query(query, (name, dob.strftime('%Y-%m-%d'), race, is_married, serial_number))
 
     messagebox.showinfo("Success", f"Criminal updated: {serial_number}")
     refresh_criminal_list()
@@ -156,7 +157,7 @@ def add_crime():
 
     serial_number = criminal_listbox.get(selection[0]).split()[0]
     crime = crime_entry.get()
-    date = date_entry.get()
+    date = date_entry.get_date()
     notes = notes_entry.get("1.0", tk.END)
 
     if not crime or not date:
@@ -169,7 +170,7 @@ def add_crime():
     INSERT INTO crimes (id, serial_number, caught, crime, date, notes)
     VALUES (%s, %s, %s, %s, %s, %s);
     """
-    execute_query(query, (crime_id, serial_number, False, crime, date, notes))
+    execute_query(query, (crime_id, serial_number, False, crime, date.strftime('%Y-%m-%d'), notes))
 
     for image_path in evidence_paths:
         with open(image_path, 'rb') as file:
@@ -191,7 +192,7 @@ def update_crime():
 
     crime_id = crime_listbox.get(selection[0]).split()[0]
     crime = crime_entry.get()
-    date = date_entry.get()
+    date = date_entry.get_date()
     notes = notes_entry.get("1.0", tk.END)
 
     if not crime or not date:
@@ -203,7 +204,7 @@ def update_crime():
     SET crime = %s, date = %s, notes = %s
     WHERE id = %s;
     """
-    execute_query(query, (crime, date, notes, crime_id))
+    execute_query(query, (crime, date.strftime('%Y-%m-%d'), notes, crime_id))
 
     # Update evidence
     query = "DELETE FROM evidence WHERE crime_id = %s;"
@@ -272,9 +273,7 @@ def view_crime():
     evidence = fetch_query(query, (crime_id,))
 
     if crime:
-        details = f"Crime: {crime['crime']}\nDate: {crime['date']}\nNotes: {crime['notes']}"
-        messagebox.showinfo("Crime Details", details)
-
+        messagebox.showinfo("Crime Details", f"Crime: {crime['crime']}\nDate: {crime['date']}\nNotes: {crime['notes']}")
         for i, img_data in enumerate(evidence):
             image = Image.open(io.BytesIO(img_data['image_data']))
             image.thumbnail((200, 200))
