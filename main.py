@@ -7,8 +7,8 @@ import io
 
 # Replace these with your actual MySQL connection details
 config = {
-    'user': 'your_username',
-    'password': 'your_password',
+    'user': 'krish',
+    'password': 'ozgpK3f.-*78_3bhUcG@eDN9kD_FQUYa8PFX9Wod',
     'host': 'localhost',
     'database': 'criminal_db',
     'raise_on_warnings': True
@@ -54,6 +54,11 @@ def gen_uuid():
 
 
 def create_tables():
+    # Create database if it doesn't exist
+    # create_db = "CREATE DATABASE IF NOT EXISTS criminal_db;"
+    # execute_query(create_db)
+
+
     create_crimes_table = """
     CREATE TABLE IF NOT EXISTS crimes (
         id VARCHAR(8) PRIMARY KEY,
