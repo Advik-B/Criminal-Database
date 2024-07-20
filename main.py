@@ -50,42 +50,41 @@ def gen_uuid():
     return ''.join(random.choice(keys) for _ in range(8))
 
 def create_tables():
-    def create_tables():
-        tables = {
-            "crimes": """
-            CREATE TABLE IF NOT EXISTS crimes (
-                id VARCHAR(8) PRIMARY KEY,
-                serial_number VARCHAR(8),
-                caught BOOLEAN,
-                crime VARCHAR(255),
-                date DATE,
-                notes TEXT
-            );
-            """,
-            "criminals": """
-            CREATE TABLE IF NOT EXISTS criminals (
-                serial_number VARCHAR(8) PRIMARY KEY,
-                name VARCHAR(255),
-                dob DATE,
-                race VARCHAR(50),
-                is_married BOOLEAN
-            );
-            """,
-            "evidence": """
-            CREATE TABLE IF NOT EXISTS evidence (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                crime_id VARCHAR(8),
-                image_data LONGBLOB,
-                FOREIGN KEY (crime_id) REFERENCES crimes(id) ON DELETE CASCADE
-            );
-            """
-        }
+    tables = {
+        "crimes": """
+        CREATE TABLE IF NOT EXISTS crimes (
+            id VARCHAR(8) PRIMARY KEY,
+            serial_number VARCHAR(8),
+            caught BOOLEAN,
+            crime VARCHAR(255),
+            date DATE,
+            notes TEXT
+        );
+        """,
+        "criminals": """
+        CREATE TABLE IF NOT EXISTS criminals (
+            serial_number VARCHAR(8) PRIMARY KEY,
+            name VARCHAR(255),
+            dob DATE,
+            race VARCHAR(50),
+            is_married BOOLEAN
+        );
+        """,
+        "evidence": """
+        CREATE TABLE IF NOT EXISTS evidence (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            crime_id VARCHAR(8),
+            image_data LONGBLOB,
+            FOREIGN KEY (crime_id) REFERENCES crimes(id) ON DELETE CASCADE
+        );
+        """
+    }
 
-        for table_name, create_table_query in tables.items():
-            try:
-                execute_query(create_table_query)
-            except mysql.connector.Error as err:
-                print(f"Error creating table {table_name}: {err}")
+    for table_name, create_table_query in tables.items():
+        try:
+            execute_query(create_table_query)
+        except mysql.connector.Error as err:
+            print(f"Error creating table {table_name}: {err}")
 
 def add_criminal():
     name = name_entry.get()
@@ -304,53 +303,61 @@ notebook.add(criminals_tab, text="Criminals")
 notebook.add(crimes_tab, text="Crimes")
 
 # Criminals tab
-ttk.Label(criminals_tab, text="Name:").grid(row=0, column=0)
+tk.Label(criminals_tab, text="Name:").grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
 name_entry = ttk.Entry(criminals_tab)
-name_entry.grid(row=0, column=1)
+name_entry.grid(row=0, column=1, padx=5, pady=5, sticky=tk.EW)
 
-ttk.Label(criminals_tab, text="Date of Birth:").grid(row=1, column=0)
-dob_entry = DateEntry(criminals_tab, date_pattern='yyyy-mm-dd')
-dob_entry.grid(row=1, column=1)
+tk.Label(criminals_tab, text="Date of Birth:").grid(row=1, column=0, padx=5, pady=5, sticky=tk.W)
+dob_entry = DateEntry(criminals_tab)
+dob_entry.grid(row=1, column=1, padx=5, pady=5, sticky=tk.EW)
 
-ttk.Label(criminals_tab, text="Race:").grid(row=2, column=0)
+tk.Label(criminals_tab, text="Race:").grid(row=2, column=0, padx=5, pady=5, sticky=tk.W)
 race_entry = ttk.Entry(criminals_tab)
-race_entry.grid(row=2, column=1)
+race_entry.grid(row=2, column=1, padx=5, pady=5, sticky=tk.EW)
 
 married_var = tk.BooleanVar()
-ttk.Checkbutton(criminals_tab, text="Married", variable=married_var).grid(row=3, column=0, columnspan=2)
+ttk.Checkbutton(criminals_tab, text="Married", variable=married_var).grid(row=3, column=0, columnspan=2, padx=5, pady=5)
 
-ttk.Button(criminals_tab, text="Add Criminal", command=add_criminal).grid(row=4, column=0)
-ttk.Button(criminals_tab, text="Update Criminal", command=update_criminal).grid(row=4, column=1)
-ttk.Button(criminals_tab, text="Delete Criminal", command=delete_criminal).grid(row=4, column=2)
+ttk.Button(criminals_tab, text="Add Criminal", command=add_criminal).grid(row=4, column=0, padx=5, pady=5)
+ttk.Button(criminals_tab, text="Update Criminal", command=update_criminal).grid(row=4, column=1, padx=5, pady=5)
+ttk.Button(criminals_tab, text="Delete Criminal", command=delete_criminal).grid(row=4, column=2, padx=5, pady=5)
 
 criminal_listbox = tk.Listbox(criminals_tab, width=50)
-criminal_listbox.grid(row=5, column=0, columnspan=3)
+criminal_listbox.grid(row=5, column=0, columnspan=3, padx=5, pady=5, sticky=tk.EW)
 
 # Crimes tab
-ttk.Label(crimes_tab, text="Crime:").grid(row=0, column=0)
+tk.Label(crimes_tab, text="Crime:").grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
 crime_entry = ttk.Entry(crimes_tab)
-crime_entry.grid(row=0, column=1)
+crime_entry.grid(row=0, column=1, padx=5, pady=5, sticky=tk.EW)
 
-ttk.Label(crimes_tab, text="Date:").grid(row=1, column=0)
-date_entry = DateEntry(crimes_tab, date_pattern='yyyy-mm-dd')
-date_entry.grid(row=1, column=1)
+tk.Label(crimes_tab, text="Date:").grid(row=1, column=0, padx=5, pady=5, sticky=tk.W)
+date_entry = DateEntry(crimes_tab)
+date_entry.grid(row=1, column=1, padx=5, pady=5, sticky=tk.EW)
 
-ttk.Label(crimes_tab, text="Notes:").grid(row=2, column=0)
+tk.Label(crimes_tab, text="Notes:").grid(row=2, column=0, padx=5, pady=5, sticky=tk.W)
 notes_entry = tk.Text(crimes_tab, height=3, width=20)
-notes_entry.grid(row=2, column=1)
+notes_entry.grid(row=2, column=1, padx=5, pady=5, sticky=tk.EW)
 
-ttk.Button(crimes_tab, text="Select Evidence", command=select_evidence).grid(row=3, column=0)
+ttk.Button(crimes_tab, text="Select Evidence", command=select_evidence).grid(row=3, column=0, padx=5, pady=5)
 evidence_label = ttk.Label(crimes_tab, text="No images selected")
-evidence_label.grid(row=3, column=1)
+evidence_label.grid(row=3, column=1, padx=5, pady=5, sticky=tk.W)
 
-ttk.Button(crimes_tab, text="Add Crime", command=add_crime).grid(row=4, column=0)
-ttk.Button(crimes_tab, text="Update Crime", command=update_crime).grid(row=4, column=1)
-ttk.Button(crimes_tab, text="Delete Crime", command=delete_crime).grid(row=4, column=2)
+ttk.Button(crimes_tab, text="Add Crime", command=add_crime).grid(row=4, column=0, padx=5, pady=5)
+ttk.Button(crimes_tab, text="Update Crime", command=update_crime).grid(row=4, column=1, padx=5, pady=5)
+ttk.Button(crimes_tab, text="Delete Crime", command=delete_crime).grid(row=4, column=2, padx=5, pady=5)
 
 crime_listbox = tk.Listbox(crimes_tab, width=50)
-crime_listbox.grid(row=5, column=0, columnspan=3)
+crime_listbox.grid(row=5, column=0, columnspan=3, padx=5, pady=5, sticky=tk.EW)
 
-ttk.Button(crimes_tab, text="View Crime", command=view_crime).grid(row=6, column=0, columnspan=3)
+ttk.Button(crimes_tab, text="View Crime", command=view_crime).grid(row=6, column=0, columnspan=3, padx=5, pady=5)
+
+# Configure grid weights for responsiveness
+for i in range(3):
+    criminals_tab.columnconfigure(i, weight=1)
+    crimes_tab.columnconfigure(i, weight=1)
+
+criminals_tab.rowconfigure(5, weight=1)
+crimes_tab.rowconfigure(5, weight=1)
 
 # Initialize
 create_tables()
