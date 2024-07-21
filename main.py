@@ -422,9 +422,13 @@ def view_crime():
             # Get the screen width
             screen_width = root.winfo_screenwidth()
             screen_height = root.winfo_screenheight()
+
+            screen_width //= 2
+            screen_height //= 2
+
             if image.width > screen_width or image.height > screen_height:
                 image.thumbnail((screen_width, screen_height))
-            
+
             photo = ImageTk.PhotoImage(image)
 
             top = tk.Toplevel()
@@ -534,7 +538,7 @@ crime_tree.heading("criminal", text="Criminal")
 crime_tree.grid(row=6, column=0, columnspan=3, padx=5, pady=5, sticky=tk.NSEW)
 crime_tree.bind('<<TreeviewSelect>>', lambda e: view_crime())
 
-ttk.Button(crimes_tab, text="View Crime", command=view_crime).grid(row=7, column=0, columnspan=3, padx=5, pady=5,
+ttk.Button(crimes_tab, text="View Evidence", command=view_crime).grid(row=7, column=0, columnspan=3, padx=5, pady=5,
                                                                    sticky=tk.W)
 
 # Configure column weights
