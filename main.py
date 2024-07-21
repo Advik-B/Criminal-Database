@@ -42,12 +42,14 @@ def execute_query(query, params=None):
     connection = create_connection()
     cursor = connection.cursor()
     try:
-        if params:
+        if params is not None:
+            # If params is a single binary object, ensure it's passed as a tuple
+            if isinstance(params, bytes):
+                params = (params,)
             cursor.execute(query, params)
         else:
             cursor.execute(query)
         connection.commit()
-        return cursor
     finally:
         cursor.close()
         connection.close()
@@ -207,12 +209,8 @@ def add_crime():
     for image_path in evidence_paths:
         with open(image_path, 'rb') as file:
             image_data = file.read()
-        query = """
-        INSERT INTO evidence (crime_id, image_data)
-        VALUES (%s, %s);
-        """
-        execute_query(query, (crime_id, image_data))
-
+            query = """INSERT INTO evidence (crime_id, image_data) VALUES (%s, %s);"""
+            execute_query(query, (crime_id, image_data))
     messagebox.showinfo("Success", f"Crime added with ID: {crime_id}")
     refresh_crime_list()
 
