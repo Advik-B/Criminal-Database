@@ -13,12 +13,25 @@ ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("dev.krish.Crimina
 
 # Replace these with your actual MySQL connection details
 config = {
-    'user': 'krish',
-    'password': 'ozgpK3f.-*78_3bhUcG@eDN9kD_FQUYa8PFX9Wod',
-    'host': 'localhost',
+    'user': 'advik',
+    'password': 'wHFPa%!x:n2pzh79uBQ*>b',
+    'host': 'advik-mysqlsrv.mysql.database.azure.com',
     'database': 'criminal_db',
     'raise_on_warnings': True
 }
+
+
+def startup():
+    # Create the database if it doesn't exist
+    conn = mysql.connector.connect(
+        user=config['user'],
+        password=config['password'],
+        host=config['host']
+    )
+    cursor = conn.cursor()
+    cursor.execute("CREATE DATABASE IF NOT EXISTS criminal_db;")
+    cursor.close()
+    conn.close()
 
 
 def create_connection():
@@ -391,6 +404,7 @@ criminals_tab.grid_columnconfigure(1, weight=1)
 crimes_tab.grid_columnconfigure(1, weight=1)
 
 # Initialize
+startup()
 create_tables()
 refresh_criminal_list()
 refresh_crime_list()
