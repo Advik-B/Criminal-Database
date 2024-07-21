@@ -382,7 +382,6 @@ def select_evidence():
     evidence_paths = list(filedialog.askopenfilenames(filetypes=[("Image files", "*.jpg *.png")]))
     evidence_label.config(text=f"{len(evidence_paths)} images selected")
 
-
 def view_crime():
     selected_item = crime_tree.selection()
     if not selected_item:
@@ -398,9 +397,10 @@ def view_crime():
     evidence = fetch_query(query, (crime_id,))
 
     if crime:
-        details = f"Crime: {crime['crime']}\nDate: {crime['date']}\nNotes: {crime['notes']}"
-        messagebox.showinfo("Crime Details", details)
+        # Fill in the fields
+        fill_crime_fields(crime)
 
+        # Display evidence
         for i, img_data in enumerate(evidence):
             image = Image.open(io.BytesIO(img_data['image_data']))
             image.thumbnail((200, 200))
@@ -413,6 +413,28 @@ def view_crime():
             label.pack()
     else:
         messagebox.showerror("Error", "Crime not found")
+
+def fill_crime_fields(crime):
+    # Set the criminal selector
+    query = "SELECT name FROM criminals WHERE serial_number = %s;"
+    criminal = fetch_query(query, (crime['serial_number'],))[0]
+    criminal_selector.set(f"{crime['serial_number']} - {criminal['name']}")
+
+    # Set the crime entry
+    crime_entry.delete(0, tk.END)
+    crime_entry.insert(0, crime['crime'])
+
+    # Set the date entry
+    date_entry.set_date(crime['date'])
+
+    # Set the notes entry
+    notes_entry.delete('1.0', tk.END)
+    notes_entry.insert('1.0', crime['notes'])
+
+    # Clear evidence selection
+    global evidence_paths
+    evidence_paths = []
+    evidence_label.config(text="No images selected")
 
 
 # Create main window
@@ -457,6 +479,7 @@ criminal_tree.heading("serial_number", text="Serial Number")
 criminal_tree.heading("name", text="Name")
 criminal_tree.grid(row=5, column=0, columnspan=3, padx=5, pady=5, sticky=tk.NSEW)
 
+
 # Crimes tab
 ttk.Label(crimes_tab, text="Criminal:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
 criminal_selector = ttk.Combobox(crimes_tab, state="readonly")
@@ -488,6 +511,7 @@ crime_tree.heading("id", text="ID")
 crime_tree.heading("crime", text="Crime")
 crime_tree.heading("criminal", text="Criminal")
 crime_tree.grid(row=6, column=0, columnspan=3, padx=5, pady=5, sticky=tk.NSEW)
+crime_tree.bind('<<TreeviewSelect>>', lambda e: view_crime())
 
 ttk.Button(crimes_tab, text="View Crime", command=view_crime).grid(row=7, column=0, columnspan=3, padx=5, pady=5,
                                                                    sticky=tk.W)
