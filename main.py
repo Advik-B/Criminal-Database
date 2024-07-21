@@ -6,6 +6,7 @@ from PIL import Image, ImageTk
 import io
 import random
 import ctypes
+import base64
 
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
 ctypes.windll.user32.SetProcessDPIAware()
@@ -38,6 +39,9 @@ def startup():
 def create_connection():
     return mysql.connector.connect(**config)
 
+def delete_evidences():
+    query = "DELETE FROM evidence;"
+    execute_query(query)
 
 def execute_query(query, params=None):
     connection = create_connection()
@@ -109,7 +113,7 @@ def create_tables():
         CREATE TABLE evidence (
             id INT AUTO_INCREMENT PRIMARY KEY,
             crime_id VARCHAR(8),
-            image_data LONGBLOB,
+            image_data TEXT,
             FOREIGN KEY (crime_id) REFERENCES crimes(id) ON DELETE CASCADE
         );
         """
@@ -208,6 +212,7 @@ def add_crime():
     for image_path in evidence_paths:
         with open(image_path, 'rb') as file:
             image_data = file.read()
+            image_data = base64.b64encode(image_data).decode('utf-8')
             query = """INSERT INTO evidence (crime_id, image_data) VALUES (%s, %s);"""
             execute_query(query, (crime_id, image_data))
 
@@ -244,11 +249,14 @@ def update_crime():
     for image_path in evidence_paths:
         with open(image_path, 'rb') as file:
             image_data = file.read()
+            data = base64.b64encode(image_data)
+
+
         query = """
         INSERT INTO evidence (crime_id, image_data)
         VALUES (%s, %s);
         """
-        execute_query(query, (crime_id, image_data))
+        execute_query(query, (crime_id, data))
 
     messagebox.showinfo("Success", f"Crime updated: {crime_id}")
     refresh_crime_list()
@@ -325,8 +333,9 @@ def add_crime():
     for image_path in evidence_paths:
         with open(image_path, 'rb') as file:
             image_data = file.read()
+            image_b64 = base64.b64encode(image_data).decode('utf-8')
             query = """INSERT INTO evidence (crime_id, image_data) VALUES (%s, %s);"""
-            execute_query(query, (crime_id, image_data))
+            execute_query(query, (crime_id, image_b64))
 
     messagebox.showinfo("Success", f"Crime added with ID: {crime_id}")
     refresh_crime_list()
@@ -365,13 +374,19 @@ def update_crime():
     execute_query(query, (crime_id,))
 
     for image_path in evidence_paths:
-        with open(image_path, 'rb') as file:
-            image_data = file.read()
+        image_data = Image.open(image_path)
+        # Convert the image to base64
+        dat = io.BytesIO()
+        image_data.save(dat, format='PNG')
+        dat.seek(0)
+        data = dat.getvalue()
+        data = base64.b64encode(data).decode('utf-8')
+
         query = """
         INSERT INTO evidence (crime_id, image_data)
         VALUES (%s, %s);
         """
-        execute_query(query, (crime_id, image_data))
+        execute_query(query, (crime_id, data))
 
     messagebox.showinfo("Success", f"Crime updated: {crime_id}")
     refresh_crime_list()
@@ -402,7 +417,7 @@ def view_crime():
 
         # Display evidence
         for i, img_data in enumerate(evidence):
-            image = Image.open(io.BytesIO(img_data['image_data']))
+            image = Image.open(io.BytesIO(base64.b64decode(img_data['image_data'])))
             image.thumbnail((200, 200))
             photo = ImageTk.PhotoImage(image)
 
@@ -521,6 +536,7 @@ criminals_tab.grid_columnconfigure(1, weight=1)
 crimes_tab.grid_columnconfigure(1, weight=1)
 
 # Initialize
+# delete_evidences()
 startup()
 create_tables()
 refresh_criminal_list()
