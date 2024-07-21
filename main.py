@@ -210,7 +210,7 @@ def add_crime():
         with open(image_path, 'rb') as file:
             image_data = file.read()
             query = """INSERT INTO evidence (crime_id, image_data) VALUES (%s, %s);"""
-            execute_query(query, (crime_id, image_data))
+            execute_query(query, (crime_id, (image_data,)))
     messagebox.showinfo("Success", f"Crime added with ID: {crime_id}")
     refresh_crime_list()
 
@@ -248,7 +248,7 @@ def update_crime():
         INSERT INTO evidence (crime_id, image_data)
         VALUES (%s, %s);
         """
-        execute_query(query, (crime_id, image_data))
+        execute_query(query, (crime_id, (image_data,)))
 
     messagebox.showinfo("Success", f"Crime updated: {crime_id}")
     refresh_crime_list()
