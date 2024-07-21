@@ -415,29 +415,44 @@ def view_crime():
         # Fill in the fields
         fill_crime_fields(crime)
 
-        # Display evidence
-        for i, img_data in enumerate(evidence):
-            image = Image.open(io.BytesIO(base64.b64decode(img_data['image_data'])))
-            # If the image is too large, resize it
-            # Get the screen width
-            screen_width = root.winfo_screenwidth()
-            screen_height = root.winfo_screenheight()
-
-            screen_width //= 2
-            screen_height //= 2
-
-            if image.width > screen_width or image.height > screen_height:
-                image.thumbnail((screen_width, screen_height))
-
-            photo = ImageTk.PhotoImage(image)
-
-            top = tk.Toplevel()
-            top.title(f"Evidence {i + 1}")
-            label = tk.Label(top, image=photo)
-            label.image = photo
-            label.pack()
     else:
         messagebox.showerror("Error", "Crime not found")
+
+def view_evidence():
+    selected_item = crime_tree.selection()
+    if not selected_item:
+        messagebox.showerror("Error", "Please select a crime to view")
+        return
+
+    crime_id = crime_tree.item(selected_item[0])['values'][0]
+
+    query = "SELECT image_data FROM evidence WHERE crime_id = %s;"
+    evidence = fetch_query(query, (crime_id,))
+
+    if not evidence:
+        messagebox.showerror("Error", "No evidence found")
+        return
+
+    for index, e in enumerate(evidence):
+        image_data = base64.b64decode(e['image_data'])
+        image = Image.open(io.BytesIO(image_data))
+        # Create a messagebox to display the image
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+
+        screen_width //= 2
+        screen_height //= 2
+
+        if image.width > screen_width or image.height > screen_height:
+            image.thumbnail((screen_width, screen_height))
+
+        photo = ImageTk.PhotoImage(image)
+
+        top = tk.Toplevel()
+        top.title(f"Evidence {index + 1}")
+        label = tk.Label(top, image=photo)
+        label.image = photo
+        label.pack()
 
 def fill_crime_fields(crime):
     # Set the criminal selector
@@ -538,7 +553,7 @@ crime_tree.heading("criminal", text="Criminal")
 crime_tree.grid(row=6, column=0, columnspan=3, padx=5, pady=5, sticky=tk.NSEW)
 crime_tree.bind('<<TreeviewSelect>>', lambda e: view_crime())
 
-ttk.Button(crimes_tab, text="View Evidence", command=view_crime).grid(row=7, column=0, columnspan=3, padx=5, pady=5,
+ttk.Button(crimes_tab, text="View Evidence", command=view_evidence).grid(row=7, column=0, columnspan=3, padx=5, pady=5,
                                                                    sticky=tk.W)
 
 # Configure column weights
