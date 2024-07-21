@@ -418,6 +418,7 @@ def view_crime():
     else:
         messagebox.showerror("Error", "Crime not found")
 
+
 def view_evidence():
     selected_item = crime_tree.selection()
     if not selected_item:
@@ -426,17 +427,24 @@ def view_evidence():
 
     crime_id = crime_tree.item(selected_item[0])['values'][0]
 
-    query = "SELECT image_data FROM evidence WHERE crime_id = %s;"
+    query = "SELECT id, image_data FROM evidence WHERE crime_id = %s;"
     evidence = fetch_query(query, (crime_id,))
 
     if not evidence:
         messagebox.showerror("Error", "No evidence found")
         return
 
+    def delete_evidence(evidence_id, top_window):
+        if messagebox.askyesno("Confirm", "Are you sure you want to delete this evidence?"):
+            query = "DELETE FROM evidence WHERE id = %s;"
+            execute_query(query, (evidence_id,))
+            messagebox.showinfo("Success", "Evidence deleted")
+            top_window.destroy()
+
     for index, e in enumerate(evidence):
         image_data = base64.b64decode(e['image_data'])
         image = Image.open(io.BytesIO(image_data))
-        # Create a messagebox to display the image
+
         screen_width = root.winfo_screenwidth()
         screen_height = root.winfo_screenheight()
 
@@ -450,9 +458,14 @@ def view_evidence():
 
         top = tk.Toplevel()
         top.title(f"Evidence {index + 1}")
+
         label = tk.Label(top, image=photo)
         label.image = photo
         label.pack()
+
+        delete_button = ttk.Button(top, text="Delete Evidence",
+                                   command=lambda eid=e['id'], window=top: delete_evidence(eid, window))
+        delete_button.pack(pady=10)
 
 def fill_crime_fields(crime):
     # Set the criminal selector
