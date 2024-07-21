@@ -256,6 +256,7 @@ def delete_crime():
         messagebox.showinfo("Success", f"Crime deleted: {crime_id}")
         refresh_crime_list()
 
+
 def refresh_criminal_list():
     for item in criminal_tree.get_children():
         criminal_tree.delete(item)
@@ -266,15 +267,101 @@ def refresh_criminal_list():
     for criminal in criminals:
         criminal_tree.insert("", "end", values=(criminal['serial_number'], criminal['name']))
 
+    # Update the criminal selector combobox
+    criminal_selector['values'] = [f"{c['serial_number']} - {c['name']}" for c in criminals]
+
+
 def refresh_crime_list():
     for item in crime_tree.get_children():
         crime_tree.delete(item)
 
-    query = "SELECT * FROM crimes;"
+    query = """
+    SELECT crimes.id, crimes.crime, criminals.name
+    FROM crimes
+    JOIN criminals ON crimes.serial_number = criminals.serial_number;
+    """
     crimes = fetch_query(query)
 
     for crime in crimes:
-        crime_tree.insert("", "end", values=(crime['id'], crime['crime']))
+        crime_tree.insert("", "end", values=(crime['id'], crime['crime'], crime['name']))
+
+
+def add_crime():
+    selected_criminal = criminal_selector.get()
+    if not selected_criminal:
+        messagebox.showerror("Error", "Please select a criminal")
+        return
+
+    serial_number = selected_criminal.split(' - ')[0]
+    crime = crime_entry.get()
+    date = date_entry.get_date()
+    notes = notes_entry.get("1.0", tk.END).strip()
+
+    if not crime or not date:
+        messagebox.showerror("Error", "Please fill all fields")
+        return
+
+    crime_id = gen_uuid()
+
+    query = """
+    INSERT INTO crimes (id, serial_number, caught, crime, date, notes)
+    VALUES (%s, %s, %s, %s, %s, %s);
+    """
+    execute_query(query, (crime_id, serial_number, False, crime, date, notes))
+
+    for image_path in evidence_paths:
+        with open(image_path, 'rb') as file:
+            image_data = file.read()
+            query = """INSERT INTO evidence (crime_id, image_data) VALUES (%s, %s);"""
+            execute_query(query, (crime_id, image_data))
+
+    messagebox.showinfo("Success", f"Crime added with ID: {crime_id}")
+    refresh_crime_list()
+
+
+def update_crime():
+    selected_item = crime_tree.selection()
+    if not selected_item:
+        messagebox.showerror("Error", "Please select a crime to update")
+        return
+
+    crime_id = crime_tree.item(selected_item[0])['values'][0]
+    selected_criminal = criminal_selector.get()
+    if not selected_criminal:
+        messagebox.showerror("Error", "Please select a criminal")
+        return
+
+    serial_number = selected_criminal.split(' - ')[0]
+    crime = crime_entry.get()
+    date = date_entry.get_date()
+    notes = notes_entry.get("1.0", tk.END).strip()
+
+    if not crime or not date:
+        messagebox.showerror("Error", "Please fill all fields")
+        return
+
+    query = """
+    UPDATE crimes
+    SET serial_number = %s, crime = %s, date = %s, notes = %s
+    WHERE id = %s;
+    """
+    execute_query(query, (serial_number, crime, date, notes, crime_id))
+
+    # Update evidence
+    query = "DELETE FROM evidence WHERE crime_id = %s;"
+    execute_query(query, (crime_id,))
+
+    for image_path in evidence_paths:
+        with open(image_path, 'rb') as file:
+            image_data = file.read()
+        query = """
+        INSERT INTO evidence (crime_id, image_data)
+        VALUES (%s, %s);
+        """
+        execute_query(query, (crime_id, image_data))
+
+    messagebox.showinfo("Success", f"Crime updated: {crime_id}")
+    refresh_crime_list()
 
 def select_evidence():
     global evidence_paths
@@ -352,32 +439,37 @@ criminal_tree.heading("name", text="Name")
 criminal_tree.grid(row=5, column=0, columnspan=3, padx=5, pady=5, sticky=tk.NSEW)
 
 # Crimes tab
-ttk.Label(crimes_tab, text="Crime:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
+ttk.Label(crimes_tab, text="Criminal:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
+criminal_selector = ttk.Combobox(crimes_tab, state="readonly")
+criminal_selector.grid(row=0, column=1, padx=5, pady=5, sticky=tk.EW)
+
+ttk.Label(crimes_tab, text="Crime:").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
 crime_entry = ttk.Entry(crimes_tab)
-crime_entry.grid(row=0, column=1, padx=5, pady=5, sticky=tk.EW)
+crime_entry.grid(row=1, column=1, padx=5, pady=5, sticky=tk.EW)
 
-ttk.Label(crimes_tab, text="Date:").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
+ttk.Label(crimes_tab, text="Date:").grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
 date_entry = DateEntry(crimes_tab, date_pattern='yyyy-mm-dd')
-date_entry.grid(row=1, column=1, padx=5, pady=5, sticky=tk.EW)
+date_entry.grid(row=2, column=1, padx=5, pady=5, sticky=tk.EW)
 
-ttk.Label(crimes_tab, text="Notes:").grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
+ttk.Label(crimes_tab, text="Notes:").grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
 notes_entry = tk.Text(crimes_tab, height=3, width=20)
-notes_entry.grid(row=2, column=1, padx=5, pady=5, sticky=tk.EW)
+notes_entry.grid(row=3, column=1, padx=5, pady=5, sticky=tk.EW)
 
-ttk.Button(crimes_tab, text="Select Evidence", command=select_evidence).grid(row=3, column=0, padx=5, pady=5, sticky=tk.W)
+ttk.Button(crimes_tab, text="Select Evidence", command=select_evidence).grid(row=4, column=0, padx=5, pady=5, sticky=tk.W)
 evidence_label = ttk.Label(crimes_tab, text="No images selected")
-evidence_label.grid(row=3, column=1, padx=5, pady=5, sticky=tk.W)
+evidence_label.grid(row=4, column=1, padx=5, pady=5, sticky=tk.W)
 
-ttk.Button(crimes_tab, text="Add Crime", command=add_crime).grid(row=4, column=0, padx=5, pady=5, sticky=tk.W)
-ttk.Button(crimes_tab, text="Update Crime", command=update_crime).grid(row=4, column=1, padx=5, pady=5, sticky=tk.W)
-ttk.Button(crimes_tab, text="Delete Crime", command=delete_crime).grid(row=4, column=2, padx=5, pady=5, sticky=tk.W)
+ttk.Button(crimes_tab, text="Add Crime", command=add_crime).grid(row=5, column=0, padx=5, pady=5, sticky=tk.W)
+ttk.Button(crimes_tab, text="Update Crime", command=update_crime).grid(row=5, column=1, padx=5, pady=5, sticky=tk.W)
+ttk.Button(crimes_tab, text="Delete Crime", command=delete_crime).grid(row=5, column=2, padx=5, pady=5, sticky=tk.W)
 
-crime_tree = ttk.Treeview(crimes_tab, columns=("id", "crime"), show="headings")
+crime_tree = ttk.Treeview(crimes_tab, columns=("id", "crime", "criminal"), show="headings")
 crime_tree.heading("id", text="ID")
 crime_tree.heading("crime", text="Crime")
-crime_tree.grid(row=5, column=0, columnspan=3, padx=5, pady=5, sticky=tk.NSEW)
+crime_tree.heading("criminal", text="Criminal")
+crime_tree.grid(row=6, column=0, columnspan=3, padx=5, pady=5, sticky=tk.NSEW)
 
-ttk.Button(crimes_tab, text="View Crime", command=view_crime).grid(row=6, column=0, columnspan=3, padx=5, pady=5, sticky=tk.W)
+ttk.Button(crimes_tab, text="View Crime", command=view_crime).grid(row=7, column=0, columnspan=3, padx=5, pady=5, sticky=tk.W)
 
 # Configure column weights
 criminals_tab.grid_columnconfigure(1, weight=1)
