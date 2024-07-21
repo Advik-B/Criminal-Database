@@ -6,6 +6,7 @@ from PIL import Image, ImageTk
 import io
 import random
 import ctypes
+
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
 ctypes.windll.user32.SetProcessDPIAware()
 # Make it so that the window icon is not python's icon
@@ -20,7 +21,6 @@ config = {
     'raise_on_warnings': True
 }
 
-
 def startup():
     # Create the database if it doesn't exist
     conn = mysql.connector.connect(
@@ -33,19 +33,14 @@ def startup():
     cursor.close()
     conn.close()
 
-
 def create_connection():
     return mysql.connector.connect(**config)
-
 
 def execute_query(query, params=None):
     connection = create_connection()
     cursor = connection.cursor()
     try:
         if params is not None:
-            # If params is a single binary object, ensure it's passed as a tuple
-            if isinstance(params, bytes):
-                params = (params,)
             cursor.execute(query, params)
         else:
             cursor.execute(query)
@@ -53,7 +48,6 @@ def execute_query(query, params=None):
     finally:
         cursor.close()
         connection.close()
-
 
 def fetch_query(query, params=None):
     connection = create_connection()
@@ -68,11 +62,9 @@ def fetch_query(query, params=None):
         cursor.close()
         connection.close()
 
-
 def gen_uuid():
     keys = "abcdefghijklmnopqrstuvwxyz1234567890"
     return ''.join(random.choice(keys) for _ in range(8))
-
 
 def table_exists(table_name):
     query = "SHOW TABLES LIKE %s;"
@@ -116,7 +108,6 @@ def create_tables():
         """
         execute_query(create_evidence_table)
 
-
 def add_criminal():
     name = name_entry.get()
     dob = dob_entry.get_date()
@@ -136,7 +127,6 @@ def add_criminal():
 
     messagebox.showinfo("Success", f"Criminal added with serial number: {serial_number}")
     refresh_criminal_list()
-
 
 def update_criminal():
     selected_item = criminal_tree.selection()
@@ -165,7 +155,6 @@ def update_criminal():
     messagebox.showinfo("Success", f"Criminal updated: {serial_number}")
     refresh_criminal_list()
 
-
 def delete_criminal():
     selected_item = criminal_tree.selection()
     if not selected_item:
@@ -181,7 +170,6 @@ def delete_criminal():
         messagebox.showinfo("Success", f"Criminal deleted: {serial_number}")
         refresh_criminal_list()
         refresh_crime_list()
-
 
 def add_crime():
     selected_item = criminal_tree.selection()
@@ -210,10 +198,10 @@ def add_crime():
         with open(image_path, 'rb') as file:
             image_data = file.read()
             query = """INSERT INTO evidence (crime_id, image_data) VALUES (%s, %s);"""
-            execute_query(query, (crime_id, (image_data,)))
+            execute_query(query, (crime_id, image_data))
+
     messagebox.showinfo("Success", f"Crime added with ID: {crime_id}")
     refresh_crime_list()
-
 
 def update_crime():
     selected_item = crime_tree.selection()
@@ -248,11 +236,10 @@ def update_crime():
         INSERT INTO evidence (crime_id, image_data)
         VALUES (%s, %s);
         """
-        execute_query(query, (crime_id, (image_data,)))
+        execute_query(query, (crime_id, image_data))
 
     messagebox.showinfo("Success", f"Crime updated: {crime_id}")
     refresh_crime_list()
-
 
 def delete_crime():
     selected_item = crime_tree.selection()
@@ -269,7 +256,6 @@ def delete_crime():
         messagebox.showinfo("Success", f"Crime deleted: {crime_id}")
         refresh_crime_list()
 
-
 def refresh_criminal_list():
     for item in criminal_tree.get_children():
         criminal_tree.delete(item)
@@ -279,7 +265,6 @@ def refresh_criminal_list():
 
     for criminal in criminals:
         criminal_tree.insert("", "end", values=(criminal['serial_number'], criminal['name']))
-
 
 def refresh_crime_list():
     for item in crime_tree.get_children():
@@ -291,12 +276,10 @@ def refresh_crime_list():
     for crime in crimes:
         crime_tree.insert("", "end", values=(crime['id'], crime['crime']))
 
-
 def select_evidence():
     global evidence_paths
     evidence_paths = list(filedialog.askopenfilenames(filetypes=[("Image files", "*.jpg *.png")]))
     evidence_label.config(text=f"{len(evidence_paths)} images selected")
-
 
 def view_crime():
     selected_item = crime_tree.selection()
@@ -328,7 +311,6 @@ def view_crime():
             label.pack()
     else:
         messagebox.showerror("Error", "Crime not found")
-
 
 # Create main window
 root = tk.Tk()
@@ -410,5 +392,12 @@ refresh_crime_list()
 evidence_paths = []
 
 # Center window
-# root.update()
+root.update_idletasks()
+width = root.winfo_width()
+height = root.winfo_height()
+x = (root.winfo_screenwidth() // 2) - (width // 2)
+y = (root.winfo_screenheight() // 2) - (height // 2)
+root.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+
+# Start the main event loop
 root.mainloop()
