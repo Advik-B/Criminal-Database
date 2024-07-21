@@ -21,6 +21,7 @@ config = {
     'raise_on_warnings': True
 }
 
+
 def startup():
     # Create the database if it doesn't exist
     conn = mysql.connector.connect(
@@ -33,8 +34,10 @@ def startup():
     cursor.close()
     conn.close()
 
+
 def create_connection():
     return mysql.connector.connect(**config)
+
 
 def execute_query(query, params=None):
     connection = create_connection()
@@ -49,6 +52,7 @@ def execute_query(query, params=None):
         cursor.close()
         connection.close()
 
+
 def fetch_query(query, params=None):
     connection = create_connection()
     cursor = connection.cursor(dictionary=True)
@@ -62,14 +66,17 @@ def fetch_query(query, params=None):
         cursor.close()
         connection.close()
 
+
 def gen_uuid():
     keys = "abcdefghijklmnopqrstuvwxyz1234567890"
     return ''.join(random.choice(keys) for _ in range(8))
+
 
 def table_exists(table_name):
     query = "SHOW TABLES LIKE %s;"
     result = fetch_query(query, (table_name,))
     return len(result) > 0
+
 
 def create_tables():
     if not table_exists('crimes'):
@@ -108,6 +115,7 @@ def create_tables():
         """
         execute_query(create_evidence_table)
 
+
 def add_criminal():
     name = name_entry.get()
     dob = dob_entry.get_date()
@@ -127,6 +135,7 @@ def add_criminal():
 
     messagebox.showinfo("Success", f"Criminal added with serial number: {serial_number}")
     refresh_criminal_list()
+
 
 def update_criminal():
     selected_item = criminal_tree.selection()
@@ -155,6 +164,7 @@ def update_criminal():
     messagebox.showinfo("Success", f"Criminal updated: {serial_number}")
     refresh_criminal_list()
 
+
 def delete_criminal():
     selected_item = criminal_tree.selection()
     if not selected_item:
@@ -170,6 +180,7 @@ def delete_criminal():
         messagebox.showinfo("Success", f"Criminal deleted: {serial_number}")
         refresh_criminal_list()
         refresh_crime_list()
+
 
 def add_crime():
     selected_item = criminal_tree.selection()
@@ -202,6 +213,7 @@ def add_crime():
 
     messagebox.showinfo("Success", f"Crime added with ID: {crime_id}")
     refresh_crime_list()
+
 
 def update_crime():
     selected_item = crime_tree.selection()
@@ -240,6 +252,7 @@ def update_crime():
 
     messagebox.showinfo("Success", f"Crime updated: {crime_id}")
     refresh_crime_list()
+
 
 def delete_crime():
     selected_item = crime_tree.selection()
@@ -363,10 +376,12 @@ def update_crime():
     messagebox.showinfo("Success", f"Crime updated: {crime_id}")
     refresh_crime_list()
 
+
 def select_evidence():
     global evidence_paths
     evidence_paths = list(filedialog.askopenfilenames(filetypes=[("Image files", "*.jpg *.png")]))
     evidence_label.config(text=f"{len(evidence_paths)} images selected")
+
 
 def view_crime():
     selected_item = crime_tree.selection()
@@ -399,6 +414,7 @@ def view_crime():
     else:
         messagebox.showerror("Error", "Crime not found")
 
+
 # Create main window
 root = tk.Tk()
 root.title("Criminal Database")
@@ -427,11 +443,14 @@ race_entry = ttk.Entry(criminals_tab)
 race_entry.grid(row=2, column=1, padx=5, pady=5, sticky=tk.EW)
 
 married_var = tk.BooleanVar()
-ttk.Checkbutton(criminals_tab, text="Married", variable=married_var).grid(row=3, column=0, columnspan=2, padx=5, pady=5, sticky=tk.W)
+ttk.Checkbutton(criminals_tab, text="Married", variable=married_var).grid(row=3, column=0, columnspan=2, padx=5, pady=5,
+                                                                          sticky=tk.W)
 
 ttk.Button(criminals_tab, text="Add Criminal", command=add_criminal).grid(row=4, column=0, padx=5, pady=5, sticky=tk.W)
-ttk.Button(criminals_tab, text="Update Criminal", command=update_criminal).grid(row=4, column=1, padx=5, pady=5, sticky=tk.W)
-ttk.Button(criminals_tab, text="Delete Criminal", command=delete_criminal).grid(row=4, column=2, padx=5, pady=5, sticky=tk.W)
+ttk.Button(criminals_tab, text="Update Criminal", command=update_criminal).grid(row=4, column=1, padx=5, pady=5,
+                                                                                sticky=tk.W)
+ttk.Button(criminals_tab, text="Delete Criminal", command=delete_criminal).grid(row=4, column=2, padx=5, pady=5,
+                                                                                sticky=tk.W)
 
 criminal_tree = ttk.Treeview(criminals_tab, columns=("serial_number", "name"), show="headings")
 criminal_tree.heading("serial_number", text="Serial Number")
@@ -455,7 +474,8 @@ ttk.Label(crimes_tab, text="Notes:").grid(row=3, column=0, sticky=tk.W, padx=5, 
 notes_entry = tk.Text(crimes_tab, height=3, width=20)
 notes_entry.grid(row=3, column=1, padx=5, pady=5, sticky=tk.EW)
 
-ttk.Button(crimes_tab, text="Select Evidence", command=select_evidence).grid(row=4, column=0, padx=5, pady=5, sticky=tk.W)
+ttk.Button(crimes_tab, text="Select Evidence", command=select_evidence).grid(row=4, column=0, padx=5, pady=5,
+                                                                             sticky=tk.W)
 evidence_label = ttk.Label(crimes_tab, text="No images selected")
 evidence_label.grid(row=4, column=1, padx=5, pady=5, sticky=tk.W)
 
@@ -469,7 +489,8 @@ crime_tree.heading("crime", text="Crime")
 crime_tree.heading("criminal", text="Criminal")
 crime_tree.grid(row=6, column=0, columnspan=3, padx=5, pady=5, sticky=tk.NSEW)
 
-ttk.Button(crimes_tab, text="View Crime", command=view_crime).grid(row=7, column=0, columnspan=3, padx=5, pady=5, sticky=tk.W)
+ttk.Button(crimes_tab, text="View Crime", command=view_crime).grid(row=7, column=0, columnspan=3, padx=5, pady=5,
+                                                                   sticky=tk.W)
 
 # Configure column weights
 criminals_tab.grid_columnconfigure(1, weight=1)
