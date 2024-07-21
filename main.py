@@ -418,7 +418,13 @@ def view_crime():
         # Display evidence
         for i, img_data in enumerate(evidence):
             image = Image.open(io.BytesIO(base64.b64decode(img_data['image_data'])))
-            image.thumbnail((200, 200))
+            # If the image is too large, resize it
+            # Get the screen width
+            screen_width = root.winfo_screenwidth()
+            screen_height = root.winfo_screenheight()
+            if image.width > screen_width or image.height > screen_height:
+                image.thumbnail((screen_width, screen_height))
+            
             photo = ImageTk.PhotoImage(image)
 
             top = tk.Toplevel()
