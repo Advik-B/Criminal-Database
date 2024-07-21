@@ -408,9 +408,6 @@ def view_crime():
     query = "SELECT * FROM crimes WHERE id = %s;"
     crime = fetch_query(query, (crime_id,))[0]
 
-    query = "SELECT image_data FROM evidence WHERE crime_id = %s;"
-    evidence = fetch_query(query, (crime_id,))
-
     if crime:
         # Fill in the fields
         fill_crime_fields(crime)
