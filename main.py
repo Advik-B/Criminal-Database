@@ -411,4 +411,6 @@ refresh_crime_list()
 
 evidence_paths = []
 
+# Center window
+# root.update()
 root.mainloop()
