@@ -39,9 +39,11 @@ def startup():
 def create_connection():
     return mysql.connector.connect(**config)
 
+
 def delete_evidences():
     query = "DELETE FROM evidence;"
     execute_query(query)
+
 
 def execute_query(query, params=None):
     connection = create_connection()
@@ -250,7 +252,6 @@ def update_crime():
         with open(image_path, 'rb') as file:
             image_data = file.read()
             data = base64.b64encode(image_data)
-
 
         query = """
         INSERT INTO evidence (crime_id, image_data)
@@ -464,6 +465,7 @@ def view_evidence():
                                    command=lambda eid=e['id'], window=top: delete_evidence(eid, window))
         delete_button.pack(pady=10)
 
+
 def fill_crime_fields(crime):
     # Set the criminal selector
     query = "SELECT name FROM criminals WHERE serial_number = %s;"
@@ -529,7 +531,6 @@ criminal_tree.heading("serial_number", text="Serial Number")
 criminal_tree.heading("name", text="Name")
 criminal_tree.grid(row=5, column=0, columnspan=3, padx=5, pady=5, sticky=tk.NSEW)
 
-
 # Crimes tab
 ttk.Label(crimes_tab, text="Criminal:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
 criminal_selector = ttk.Combobox(crimes_tab, state="readonly")
@@ -564,7 +565,7 @@ crime_tree.grid(row=6, column=0, columnspan=3, padx=5, pady=5, sticky=tk.NSEW)
 crime_tree.bind('<<TreeviewSelect>>', lambda e: view_crime())
 
 ttk.Button(crimes_tab, text="View Evidence", command=view_evidence).grid(row=7, column=0, columnspan=3, padx=5, pady=5,
-                                                                   sticky=tk.W)
+                                                                         sticky=tk.W)
 
 # Configure column weights
 criminals_tab.grid_columnconfigure(1, weight=1)
